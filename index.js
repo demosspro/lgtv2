@@ -9,7 +9,7 @@
 var fs = require('fs');
 var EventEmitter = require('events').EventEmitter;
 var util = require('util');
-var WebSocketClient = require('websocket').client;
+var WebSocketClient = require('websocket');
 var ppath = require('persist-path');
 var mkdirp = require('mkdirp');
 
@@ -43,7 +43,7 @@ var LGTV = function (config) {
     config.url = config.url || 'ws://lgwebostv:3000';
     config.timeout = config.timeout || 15000;
     config.reconnect = typeof config.reconnect === 'undefined' ? 5000 : config.reconnect;
-    config.wsconfig = config.wsconfig || {keepalive: true, keepaliveInterval: 10000, dropConnectionOnKeepaliveTimeout: true, keepaliveGracePeriod: 5000};
+    config.wsconfig = config.wsconfig || {keepalive: true, keepaliveInterval: 10000, dropConnectionOnKeepaliveTimeout: true, keepaliveGracePeriod: 5000, tlsOptions: { rejectUnauthorized: false } };
     if (typeof config.clientKey === 'undefined') {
         if(!config.keyFile){
             mkdirp(ppath('lgtv2'));
@@ -62,7 +62,7 @@ var LGTV = function (config) {
         fs.writeFile(config.keyFile, key, cb);
     };
 
-    var client = new WebSocketClient(config.wsconfig);
+    var client = new WebSocketClient.client(config.wsconfig);
     var connection = {};
     var isPaired = false;
     var autoReconnect = config.reconnect;
@@ -261,7 +261,7 @@ var LGTV = function (config) {
                 return;
             }
 
-            var special = new WebSocketClient();
+            var special = new WebSocketClient.client({ tlsOptions: { rejectUnauthorized: false } });
             special
                 .on('connect', function (conn) {
                     conn
